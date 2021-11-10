@@ -12,7 +12,8 @@ $ yarn add grexcept
 ```
 
 ## Usage
-To view all details about the classes including their attributes, please see /Docs.
+To view all details about the classes including their attributes, please see /Docs or
+follow this link: [Docs](https://htmlpreview.github.io/?https://raw.githubusercontent.com/wassy92x/grexcept/main/Docs/index.html).
 
 ### Exception
 Baseclass of all other exception classes.
