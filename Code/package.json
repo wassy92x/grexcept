@@ -3,6 +3,16 @@
   "version": "1.0.0",
   "description": "Common exception classes for browser and NodeJS",
   "repository": "https://github.com/wassy92x/grexcept",
+  "readme": "../README.md",
+  "keywords": [
+    "exceptions",
+    "exception",
+    "error",
+    "fail",
+    "common",
+    "nodejs",
+    "browser"
+  ],
   "main": "dist/Index.js",
   "types": "dist/Index.d.ts",
   "author": "Fabian Wassenhoven <info@it-creators.de>",
