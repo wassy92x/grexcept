@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "Common exception classes for browser and NodeJS",
   "repository": "https://github.com/wassy92x/grexcept",
-  "readme": "../README.md",
   "keywords": [
     "exceptions",
     "exception",
@@ -18,7 +17,9 @@
   "author": "Fabian Wassenhoven <info@it-creators.de>",
   "license": "MIT",
   "scripts": {
-    "build": "tsc"
+    "build:Release": "tsc",
+    "build:Documentation": "typedoc --out ../Docs src/Index.ts",
+    "publish": "npm publish --access public"
   },
   "devDependencies": {
     "typedoc": "^0.22.8",
