@@ -1,5 +1,8 @@
 import {Exception} from "./Exception";
 
+/**
+ * Exception that will be thrown if some operation has timed out.
+ */
 export class TimeoutException extends Exception {
     public readonly timeout: number;
 

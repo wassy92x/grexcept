@@ -1,5 +1,8 @@
 import {Exception} from './Exception';
 
+/**
+ * Exception that will be thrown if some resource or entity was not found.
+ */
 export class NotFoundException extends Exception {
     public readonly entityName: string;
 

@@ -1,5 +1,8 @@
 import {Exception} from './Exception';
 
+/**
+ * Exception that will be thrown if a value is invalid.
+ */
 export class ArgumentException extends Exception {
     public readonly argumentName: string;
 

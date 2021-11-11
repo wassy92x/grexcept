@@ -1,5 +1,8 @@
 import {Exception} from "./Exception";
 
+/**
+ * Exception that will be thrown if a plain object is thrown somewhere else.
+ */
 export class ChuckNorrisException extends Exception {
     public readonly exceptionObject: any;
 

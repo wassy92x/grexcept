@@ -1,5 +1,8 @@
 import {Exception} from './Exception';
 
+/**
+ * Exception that will be thrown if a call of a method is invalid because of the current state of the object.
+ */
 export class InvalidOperationException extends Exception {
     public constructor(innerException?: Error);
     public constructor(message?: string, innerException?: Error);

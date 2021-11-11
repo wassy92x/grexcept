@@ -8,17 +8,25 @@
     "exception",
     "error",
     "fail",
+    "failure",
     "common",
     "nodejs",
-    "browser"
+    "browser",
+    "anomaly",
+    "try",
+    "catch"
   ],
   "main": "dist/Index.js",
   "types": "dist/Index.d.ts",
   "author": "Fabian Wassenhoven <info@it-creators.de>",
   "license": "MIT",
+  "engines": {
+    "node": ">=6.4.0"
+  },
   "scripts": {
-    "build:Release": "tsc",
-    "build:Documentation": "typedoc --out ../Docs src/Index.ts",
+    "build:Release": "tsc --sourceMap false",
+    "build:Debug": "tsc",
+    "build:Documentation": "typedoc --out ../Docs --excludePrivate src/Index.ts",
     "publish": "npm publish --access public"
   },
   "devDependencies": {

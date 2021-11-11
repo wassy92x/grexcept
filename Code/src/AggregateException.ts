@@ -1,5 +1,8 @@
 import {Exception} from "./Exception";
 
+/**
+ * Exception that will be thrown if multiple errors occurred.
+ */
 export class AggregateException extends Exception implements Iterable<Error> {
     public readonly innerExceptions: ReadonlyArray<Error>;
 

@@ -1,5 +1,8 @@
 import {ChuckNorrisException} from "./ChuckNorrisException";
 
+/**
+ * Baseclass of all other exception classes.
+ */
 export class Exception implements Error {
     public readonly name: string;
     public readonly innerException?: Error;

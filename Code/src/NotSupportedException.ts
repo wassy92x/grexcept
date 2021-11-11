@@ -1,5 +1,8 @@
 import {Exception} from './Exception';
 
+/**
+ * Exception that will be thrown if the called method or operation is not supported.
+ */
 export class NotSupportedException extends Exception {
     public constructor(innerException?: Error);
     public constructor(message?: string, innerException?: Error);

@@ -1,5 +1,8 @@
 import {ArgumentException} from './ArgumentException';
 
+/**
+ * Exception that will be thrown if a value is out of a range.
+ */
 export class ArgumentOutOfRangeException extends ArgumentException {
     public readonly actualValue: any;
 
