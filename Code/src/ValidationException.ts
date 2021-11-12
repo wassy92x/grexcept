@@ -1,14 +1,13 @@
-import {ArgumentException} from "./ArgumentException";
+import {Exception} from './Exception';
 
 /**
  * Exception that will be thrown if a validation of some argument failed.
  */
-export class ValidationException extends ArgumentException {
-    public constructor(argumentName: string, message?: string, innerException?: Error);
-    public constructor(argumentName: string, innerException?: Error);
-    public constructor(argumentName: string, messageOrInnerException?: string | Error, innerException?: Error) {
+export class ValidationException extends Exception {
+    public constructor(message?: string, innerException?: Error);
+    public constructor(innerException?: Error);
+    public constructor(messageOrInnerException?: string | Error, innerException?: Error) {
         super(
-            argumentName,
             typeof messageOrInnerException === 'string' ?
                 messageOrInnerException :
                 'Validation failed.',

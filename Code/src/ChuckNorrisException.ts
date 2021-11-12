@@ -1,4 +1,4 @@
-import {Exception} from "./Exception";
+import {Exception} from './Exception';
 
 /**
  * Exception that will be thrown if a plain object is thrown somewhere else.

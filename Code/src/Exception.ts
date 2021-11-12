@@ -1,4 +1,4 @@
-import {ChuckNorrisException} from "./ChuckNorrisException";
+import {ChuckNorrisException} from './ChuckNorrisException';
 
 /**
  * Baseclass of all other exception classes.
