@@ -1,6 +1,6 @@
 {
   "name": "grexcept",
-  "version": "1.0.3",
+  "version": "1.0.0",
   "description": "Common exception classes for browser and NodeJS",
   "repository": "https://github.com/wassy92x/grexcept",
   "keywords": [
@@ -20,8 +20,8 @@
   "license": "MIT",
   "files": [
     "dist/**/*",
-    "../README.md",
-    "../LICENSE"
+    "./README.md",
+    "./LICENSE"
   ],
   "main": "dist/Index.js",
   "types": "dist/Index.d.ts",
@@ -31,7 +31,9 @@
   "scripts": {
     "build:Release": "tsc --sourceMap false",
     "build:Debug": "tsc",
-    "build:Documentation": "typedoc --out ../Docs --readme ../README.md --excludePrivate src/Index.ts"
+    "build:Documentation": "typedoc --out ../Docs --readme ../README.md --excludePrivate src/Index.ts",
+    "prepack": "node bin/preparePack.js",
+    "postpack": "node bin/postPack.js"
   },
   "devDependencies": {
     "typescript": "^4.3.5"
