@@ -1,6 +1,6 @@
 {
   "name": "grexcept",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Common exception classes for browser and NodeJS",
   "repository": "https://github.com/wassy92x/grexcept",
   "keywords": [
