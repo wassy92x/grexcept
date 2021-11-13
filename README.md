@@ -79,8 +79,8 @@ new InvalidOperationException(message?: string, innerException?: Error)
 Exception that will be thrown if an object or string doesn't fulfill the excepted format.
 ```
 import {InvalidFormatException} from 'grexcept';
-new InvalidFormatException(argumentName: string, message?: string, innerException?: Error)
-new InvalidFormatException(argumentName: string, innerException?: Error)
+new InvalidFormatException(message?: string, innerException?: Error)
+new InvalidFormatException(innerException?: Error)
 ```
 
 ### IOException
@@ -134,6 +134,6 @@ new TimeoutException(timeout: number, innerException?: Error)
 Exception that will be thrown if a validation of some argument failed.
 ```
 import {ValidationException} from 'grexcept';
-new ValidationException(argumentName: string, message?: string, innerException?: Error)
-new ValidationException(argumentName: string, innerException?: Error)
+new ValidationException(message?: string, innerException?: Error)
+new ValidationException(innerException?: Error)
 ```

@@ -1,6 +1,6 @@
 {
   "name": "grexcept",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Common exception classes for browser and NodeJS",
   "repository": "https://github.com/wassy92x/grexcept",
   "keywords": [
@@ -16,21 +16,23 @@
     "try",
     "catch"
   ],
-  "main": "dist/Index.js",
-  "types": "dist/Index.d.ts",
   "author": "Fabian Wassenhoven <info@it-creators.de>",
   "license": "MIT",
+  "files": [
+    "dist/**/*",
+    "../README.md"
+  ],
+  "main": "dist/Index.js",
+  "types": "dist/Index.d.ts",
   "engines": {
     "node": ">=6.4.0"
   },
   "scripts": {
     "build:Release": "tsc --sourceMap false",
     "build:Debug": "tsc",
-    "build:Documentation": "typedoc --out ../Docs --excludePrivate src/Index.ts",
-    "publish": "npm publish --access public"
+    "build:Documentation": "typedoc --out ../Docs --readme ../README.md --excludePrivate src/Index.ts"
   },
   "devDependencies": {
-    "typedoc": "^0.22.8",
     "typescript": "^4.3.5"
   }
 }
