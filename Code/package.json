@@ -20,7 +20,8 @@
   "license": "MIT",
   "files": [
     "dist/**/*",
-    "../README.md"
+    "../README.md",
+    "../LICENSE"
   ],
   "main": "dist/Index.js",
   "types": "dist/Index.d.ts",
