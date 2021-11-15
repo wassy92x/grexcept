@@ -2,6 +2,7 @@
 
 ![NPM Version](https://img.shields.io/npm/v/grexcept)
 ![MIT License](https://img.shields.io/npm/l/grexcept)
+![Minified Size](https://img.shields.io/bundlephobia/min/grexcept)
 
 Collection of common exception classes for JavaScript, written in TypeScript
 and running in the browser and NodeJS.
