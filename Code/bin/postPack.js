@@ -1,3 +1,3 @@
 const fs = require('fs');
-fs.rmSync('../README.md', './README.md');
-fs.rmSync('../LICENSE', './LICENSE');
+fs.rmSync('./README.md');
+fs.rmSync('./LICENSE');
