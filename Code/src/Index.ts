@@ -2,7 +2,6 @@ export * from './AggregateException';
 export * from './ArgumentException';
 export * from './ArgumentNullException';
 export * from './ArgumentOutOfRangeException';
-export * from './ChuckNorrisException';
 export * from './Exception';
 export * from './InvalidFormatException';
 export * from './InvalidOperationException';

@@ -1,5 +1,3 @@
-import {ChuckNorrisException} from './ChuckNorrisException';
-
 /**
  * Baseclass of all other exception classes.
  */
@@ -49,5 +47,17 @@ export class Exception implements Error {
             (typeof ex === 'string' || ex instanceof String) ?
                 new Exception(ex.toString()) :
                 new ChuckNorrisException(ex);
+    }
+}
+
+/**
+ * Exception that will be thrown if a plain object is thrown somewhere else.
+ */
+export class ChuckNorrisException extends Exception {
+    public readonly exceptionObject: any;
+
+    public constructor(exceptionObject: any) {
+        super(`An error occurred.\nException object: ${exceptionObject}`);
+        this.exceptionObject = exceptionObject;
     }
 }
