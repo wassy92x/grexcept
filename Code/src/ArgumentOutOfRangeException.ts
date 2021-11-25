@@ -6,9 +6,9 @@ import {ArgumentException} from './ArgumentException';
 export class ArgumentOutOfRangeException extends ArgumentException {
     public readonly actualValue: any;
 
-    public constructor(argumentName: string, actualValue: any, message?: string, innerException?: Error);
-    public constructor(argumentName: string, actualValue: any, innerException?: Error);
-    public constructor(argumentName: string, actualValue: any, messageOrInnerException?: string | Error, innerException?: Error) {
+    public constructor(argumentName: PropertyKey, actualValue: any, message?: string, innerException?: Error);
+    public constructor(argumentName: PropertyKey, actualValue: any, innerException?: Error);
+    public constructor(argumentName: PropertyKey, actualValue: any, messageOrInnerException?: string | Error, innerException?: Error) {
         super(
             argumentName,
             typeof messageOrInnerException === 'string' ?

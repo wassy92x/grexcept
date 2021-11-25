@@ -44,24 +44,24 @@ new AggregateException(innerException: Error | Error[])
 Exception that will be thrown if a value is invalid.
 ```
 import {ArgumentException} from 'grexcept';
-new ArgumentException(argumentName: string, message?: string, innerException?: Error)
-new ArgumentException(argumentName: string, innerException?: Error)
+new ArgumentException(argumentName: PropertyKey, message?: string, innerException?: Error)
+new ArgumentException(argumentName: PropertyKey, innerException?: Error)
 ```
 
 ### ArgumentNullException
 Exception that will be thrown if a value is null or undefined.
 ```
 import {ArgumentNullException} from 'grexcept';
-new ArgumentNullException(argumentName: string, message?: string, innerException?: Error)
-new ArgumentNullException(argumentName: string, innerException?: Error)
+new ArgumentNullException(argumentName: PropertyKey, message?: string, innerException?: Error)
+new ArgumentNullException(argumentName: PropertyKey, innerException?: Error)
 ```
 
 ### ArgumentOutOfRangeException
 Exception that will be thrown if a value is out of a range.
 ```
 import {ArgumentOutOfRangeException} from 'grexcept';
-new ArgumentOutOfRangeException(argumentName: string, actualValue: any, message?: string, innerException?: Error)
-new ArgumentOutOfRangeException(argumentName: string, actualValue: any, innerException?: Error)
+new ArgumentOutOfRangeException(argumentName: PropertyKey, actualValue: any, message?: string, innerException?: Error)
+new ArgumentOutOfRangeException(argumentName: PropertyKey, actualValue: any, innerException?: Error)
 ```
 
 ### ChuckNorrisException

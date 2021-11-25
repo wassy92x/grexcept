@@ -4,9 +4,9 @@ import {ArgumentException} from './ArgumentException';
  * Exception that will be thrown if a value is null or undefined.
  */
 export class ArgumentNullException extends ArgumentException {
-    public constructor(argumentName: string, message?: string, innerException?: Error);
-    public constructor(argumentName: string, innerException?: Error);
-    public constructor(argumentName: string, messageOrInnerException?: string | Error, innerException?: Error) {
+    public constructor(argumentName: PropertyKey, message?: string, innerException?: Error);
+    public constructor(argumentName: PropertyKey, innerException?: Error);
+    public constructor(argumentName: PropertyKey, messageOrInnerException?: string | Error, innerException?: Error) {
         super(
             argumentName,
             typeof messageOrInnerException === 'string' ?
