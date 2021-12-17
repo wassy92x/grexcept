@@ -100,8 +100,8 @@ new IOException(innerException?: Error)
 Exception that will be thrown if some resource or entity was not found.
 ```
 import {NotFoundException} from 'grexcept';
-new NotFoundException(entity: string | (new () => any), message?: string, innerException?: Error)
-new NotFoundException(entity: string | (new () => any), innerException?: Error)
+new NotFoundException(entity: string | (new (...args: any[]) => any), message?: string, innerException?: Error)
+new NotFoundException(entity: string | (new (...args: any[]) => any), innerException?: Error)
 ```
 
 ### NotImplementedException

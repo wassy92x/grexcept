@@ -6,9 +6,9 @@ import {Exception} from './Exception';
 export class NotFoundException extends Exception {
     public readonly entityName: string;
 
-    public constructor(entity: string | (new () => any), message?: string, innerException?: Error);
-    public constructor(entity: string | (new () => any), innerException?: Error);
-    public constructor(entity: string | (new () => any), messageOrInnerException?: string | Error, innerException?: Error) {
+    public constructor(entity: string | (new (...args: any[]) => any), message?: string, innerException?: Error);
+    public constructor(entity: string | (new (...args: any[]) => any), innerException?: Error);
+    public constructor(entity: string | (new (...args: any[]) => any), messageOrInnerException?: string | Error, innerException?: Error) {
         super(
             typeof messageOrInnerException === 'string' ?
                 `${messageOrInnerException}\nEntity name: '${entity}'` :
