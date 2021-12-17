@@ -1,3 +1,4 @@
+
 # GreXcept
 
 ![NPM Version](https://img.shields.io/npm/v/grexcept)
@@ -75,8 +76,8 @@ new ChuckNorrisException(exceptionObject: any)
 Exception that will be thrown if a call of a method is invalid because of the current state of the object.
 ```
 import {InvalidOperationException} from 'grexcept';
-new InvalidOperationException(innerException?: Error)
 new InvalidOperationException(message?: string, innerException?: Error)
+new InvalidOperationException(innerException?: Error)
 ```
 
 ### InvalidFormatException
@@ -91,8 +92,8 @@ new InvalidFormatException(innerException?: Error)
 Exception that will be thrown if an input or output error occurred.
 ```
 import {IOException} from 'grexcept';
-new IOException(innerException?: Error)
 new IOException(message?: string, innerException?: Error)
+new IOException(innerException?: Error)
 ```
 
 ### NotFoundException
@@ -107,30 +108,38 @@ new NotFoundException(entity: string | (new () => any), innerException?: Error)
 Exception that will be thrown if some method or operation is not implemented.
 ```
 import {NotImplementedException} from 'grexcept';
-new NotImplementedException(innerException?: Error)
 new NotImplementedException(message?: string, innerException?: Error)
+new NotImplementedException(innerException?: Error)
 ```
 
 ### NotPermittedException
 Exception that will be thrown if the callee is not permitted to execute this method or operation.
 ```
 import {NotPermittedException} from 'grexcept';
-new NotPermittedException(innerException?: Error)
 new NotPermittedException(message?: string, innerException?: Error)
+new NotPermittedException(innerException?: Error)
 ```
 
 ### NotSupportedException
 Exception that will be thrown if the called method or operation is not supported.
 ```
 import {NotSupportedException} from 'grexcept';
-new NotSupportedException(innerException?: Error)
 new NotSupportedException(message?: string, innerException?: Error)
+new NotSupportedException(innerException?: Error)
+```
+
+### OperationAbortedException
+```
+import {OperationAbortedException} from 'grexcept';
+new OperationAbortedException(reason?: string, innerException?: Error)
+new OperationAbortedException(innerException?: Error)
 ```
 
 ### TimeoutException
+Exception that will be thrown if a timeout has been reached and an operation was canceled.
 ```
 import {TimeoutException} from 'grexcept';
-new TimeoutException(timeout: number, message?: string, innerException?: Error)
+new TimeoutException(timeout: number, reason?: string, innerException?: Error)
 new TimeoutException(timeout: number, innerException?: Error)
 ```
 
