@@ -57,7 +57,10 @@ export class ChuckNorrisException extends Exception {
     public readonly exceptionObject: any;
 
     public constructor(exceptionObject: any) {
-        super(`An error occurred.\nException object: ${exceptionObject}`);
+        super(typeof exceptionObject === 'object' ?
+            `An error occurred.\n${Object.entries(exceptionObject).map(([key, value]) => `${key}: ${value}`).join('\n')}` :
+            `An error occurred.\nExceptionObject: ${exceptionObject}`
+        );
         this.exceptionObject = exceptionObject;
     }
 }
