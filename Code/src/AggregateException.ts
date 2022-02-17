@@ -9,14 +9,8 @@ export class AggregateException extends Exception implements Iterable<Error> {
     public constructor(innerException: Error | Error[], message?: string);
     public constructor(innerException: Error | Error[]);
     public constructor(innerException: Error | Error[], message?: string) {
-        const innerExceptions = Array.isArray(innerException) ? innerException.slice() : [innerException];
-        const innerMessages = innerExceptions
-            .map((ex: Error, i: number) => {
-                const innerStack = ex.stack?.replace(/\n/g, '\n\t') ?? `${ex.name}: ${ex.message}`;
-                return `---> (Inner Exception #${i}) ${innerStack}`;
-            })
-            .join('\n');
-        super(message ? `${message}\n${innerMessages}` : `One or more errors occurred.\n${innerMessages}`);
+        const innerExceptions = Array.isArray(innerException) ? innerException.slice() : [innerException]
+        super(message ?? `One or more errors occurred.`, innerExceptions[0]);
         this.innerExceptions = innerExceptions;
     }
 
@@ -26,5 +20,16 @@ export class AggregateException extends Exception implements Iterable<Error> {
 
     public toArray(): Error[] {
         return this.innerExceptions.slice();
+    }
+
+    get stack(): string {
+        const innerStacks = this.innerExceptions
+            .map((ex: Error, i: number) => {
+                const innerStack = ex.stack?.replace(/\n/g, '\n\t') ?? `${ex.name}: ${ex.message}`;
+                return `---> (Inner Exception #${i}) ${innerStack}`;
+            })
+            .join('\n\n');
+
+        return `${super.stack}\n${innerStacks}`;
     }
 }

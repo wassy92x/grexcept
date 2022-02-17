@@ -4,31 +4,29 @@
 export class Exception implements Error {
     public readonly name: string;
     public readonly innerException?: Error;
-    private _message: string;
-    private readonly _stack?: string;
+    public readonly message: string;
+    private readonly _stackTrace?: string;
 
     protected constructor(message: string, innerException?: Error) {
         this.name = this.constructor.name;
-        this._message = message;
+        this.message = message;
         this.innerException = innerException;
-        this._stack = typeof (Error as any).captureStackTrace === 'function' ?
-            (Error as any).captureStackTrace(this, this.constructor) :
-            (new Error(message)).stack;
-    }
-
-    public get message(): string {
-        return this._message;
-    }
-
-    protected set message(msg: string) {
-        this._message = msg;
+        if (typeof (Error as any).captureStackTrace === 'function') {
+            const capturedStack = {stack: ''};
+            (Error as any).captureStackTrace(capturedStack, this.constructor);
+            this._stackTrace = capturedStack.stack.substr(capturedStack.stack.indexOf('\n') + 1); // Remove classname and message
+        } else {
+            const capturedStack = (new Error()).stack || '';
+            this._stackTrace = capturedStack.substr(capturedStack.indexOf('\n', capturedStack.indexOf('\n') + 1) + 1); // Remove classname, message and first line of stackTrace
+        }
     }
 
     public get stack(): string {
         if (!this.innerException)
-            return this._stack || `${this.name}: ${this.message}`;
+            return `${this.name}: ${this.message}\n${this._stackTrace}`;
 
-        return `${this.name}: ${this.message}\n${this.innerException.stack ?? `${this.innerException.name}: ${this.innerException.message}`}`;
+        const innerException = this.innerException.stack ?? `${this.innerException.name}: ${this.innerException.message}`;
+        return `${this.name}: ${this.message} --> ${innerException}\n--- End of inner exception stack trace ---\n${this._stackTrace}`;
     }
 
     public toString(): string {
@@ -38,7 +36,7 @@ export class Exception implements Error {
     public static isError(ex: any): ex is Error {
         return ex instanceof Error ||
             ex instanceof Exception ||
-            ((ex.stack || ex.stack === '') && (ex.name || ex.name === '') && (ex.message || ex.message === ''));
+            (ex && (ex.stack || ex.stack === '') && (ex.name || ex.name === '') && (ex.message || ex.message === ''));
     }
 
     public static fromObject(ex: any): Error {
@@ -57,7 +55,7 @@ export class ChuckNorrisException extends Exception {
     public readonly exceptionObject: any;
 
     public constructor(exceptionObject: any) {
-        super(typeof exceptionObject === 'object' ?
+        super(typeof exceptionObject === 'object' && exceptionObject !== null ?
             `An error occurred.\n${Object.entries(exceptionObject).map(([key, value]) => `${key}: ${value}`).join('\n')}` :
             `An error occurred.\nExceptionObject: ${exceptionObject}`
         );
