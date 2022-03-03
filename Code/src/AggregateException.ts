@@ -4,26 +4,26 @@ import {Exception} from './Exception';
  * Exception that will be thrown if multiple errors occurred.
  */
 export class AggregateException extends Exception implements Iterable<Error> {
-    public readonly causes: ReadonlyArray<Error>;
+    public readonly innerExceptions: ReadonlyArray<Error>;
 
-    public constructor(cause: Error | Error[], message?: string);
-    public constructor(cause: Error | Error[]);
-    public constructor(cause: Error | Error[], message?: string) {
-        const causes = Array.isArray(cause) ? cause.slice() : [cause]
-        super(message ?? `One or more errors occurred.`, causes[0]);
-        this.causes = causes;
+    public constructor(innerExceptions: Error | Error[], message?: string);
+    public constructor(innerExceptions: Error | Error[]);
+    public constructor(innerExceptions: Error | Error[], message?: string) {
+        const exceptions = Array.isArray(innerExceptions) ? innerExceptions.slice() : [innerExceptions]
+        super(message ?? `One or more errors occurred.`, exceptions[0]);
+        this.innerExceptions = exceptions;
     }
 
     public [Symbol.iterator](): Iterator<Error> {
-        return this.causes[Symbol.iterator]();
+        return this.innerExceptions[Symbol.iterator]();
     }
 
     public toArray(): Error[] {
-        return this.causes.slice();
+        return this.innerExceptions.slice();
     }
 
     get stack(): string {
-        const innerStacks = this.causes
+        const innerStacks = this.innerExceptions
             .map((ex: Error, i: number) => {
                 const innerStack = ex.stack?.replace(/\n/g, '\n\t') ?? `${ex.name}: ${ex.message}`;
                 return `---> (Inner Exception #${i}) ${innerStack}`;
