@@ -1,18 +1,16 @@
 /**
  * Baseclass of all other exception classes.
  */
-export class Exception implements Error {
-    public readonly name: string;
-    public readonly innerException?: Error;
-    public readonly message: string;
+export class Exception extends Error {
+    public readonly cause?: Error;
     public readonly data: Record<PropertyKey, any>;
     private readonly _stackTrace?: string;
 
-    protected constructor(message: string, innerException?: Error) {
+    public constructor(message: string, cause?: Error) {
+        super(message);
         this.name = this.constructor.name;
-        this.message = message;
         this.data = {};
-        this.innerException = innerException;
+        this.cause = cause;
         if (typeof (Error as any).captureStackTrace === 'function') {
             const capturedStack = {stack: ''};
             (Error as any).captureStackTrace(capturedStack, this.constructor);
@@ -28,11 +26,11 @@ export class Exception implements Error {
         if (dataEntries)
             dataEntries += '\n';
 
-        if (!this.innerException)
+        if (!this.cause)
             return `${this.name}: ${this.message}\n${dataEntries}${this._stackTrace}`;
 
-        const innerException = this.innerException.stack ?? `${this.innerException.name}: ${this.innerException.message}`;
-        return `${this.name}: ${this.message} --> ${innerException}\n--- End of inner exception stack trace ---\n${dataEntries}${this._stackTrace}`;
+        const cause = this.cause.stack ?? `${this.cause.name}: ${this.cause.message}`;
+        return `${this.name}: ${this.message} --> ${cause}\n--- End of inner exception stack trace ---\n${dataEntries}${this._stackTrace}`;
     }
 
     private _stringifyData(): string {
@@ -47,6 +45,13 @@ export class Exception implements Error {
 
     public toString(): string {
         return this.stack;
+    }
+
+    /**
+     * @deprecated The property should not be used. Use instead .cause
+     */
+    public get innerException(): Error | undefined {
+        return this.cause;
     }
 
     public static isError(ex: any): ex is Error {

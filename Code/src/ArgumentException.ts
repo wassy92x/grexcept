@@ -6,16 +6,16 @@ import {Exception} from './Exception';
 export class ArgumentException extends Exception {
     private readonly _argumentName: symbol;
 
-    public constructor(argumentName: PropertyKey, message?: string, innerException?: Error);
-    public constructor(argumentName: PropertyKey, innerException?: Error);
-    public constructor(argumentName: PropertyKey, messageOrInnerException?: string | Error, innerException?: Error) {
+    public constructor(argumentName: PropertyKey, message?: string, cause?: Error);
+    public constructor(argumentName: PropertyKey, cause?: Error);
+    public constructor(argumentName: PropertyKey, messageOrCause?: string | Error, cause?: Error) {
         super(
-            typeof messageOrInnerException === 'string' ?
-                messageOrInnerException :
+            typeof messageOrCause === 'string' ?
+                messageOrCause :
                 'Value is invalid',
-            typeof messageOrInnerException === 'string' || innerException ?
-                innerException :
-                messageOrInnerException
+            typeof messageOrCause === 'string' || cause ?
+                cause :
+                messageOrCause
         );
         this._argumentName = Symbol('Argument name');
         this.data[this._argumentName] = argumentName;

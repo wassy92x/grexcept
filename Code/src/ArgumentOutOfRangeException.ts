@@ -6,17 +6,17 @@ import {ArgumentException} from './ArgumentException';
 export class ArgumentOutOfRangeException extends ArgumentException {
     private readonly _actualValue: symbol;
 
-    public constructor(argumentName: PropertyKey, actualValue: any, message?: string, innerException?: Error);
-    public constructor(argumentName: PropertyKey, actualValue: any, innerException?: Error);
-    public constructor(argumentName: PropertyKey, actualValue: any, messageOrInnerException?: string | Error, innerException?: Error) {
+    public constructor(argumentName: PropertyKey, actualValue: any, message?: string, cause?: Error);
+    public constructor(argumentName: PropertyKey, actualValue: any, cause?: Error);
+    public constructor(argumentName: PropertyKey, actualValue: any, messageOrCause?: string | Error, cause?: Error) {
         super(
             argumentName,
-            typeof messageOrInnerException === 'string' ?
-                messageOrInnerException :
+            typeof messageOrCause === 'string' ?
+                messageOrCause :
                 'Value is out of range.',
-            typeof messageOrInnerException === 'string' || innerException ?
-                innerException :
-                messageOrInnerException
+            typeof messageOrCause === 'string' || cause ?
+                cause :
+                messageOrCause
         );
         this._actualValue = Symbol('Value');
         this.data[this._actualValue] = actualValue;

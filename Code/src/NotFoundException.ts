@@ -6,16 +6,16 @@ import {Exception} from './Exception';
 export class NotFoundException extends Exception {
     public readonly _entityType: symbol;
 
-    public constructor(entity: string | (new (...args: any[]) => any), message?: string, innerException?: Error);
-    public constructor(entity: string | (new (...args: any[]) => any), innerException?: Error);
-    public constructor(entity: string | (new (...args: any[]) => any), messageOrInnerException?: string | Error, innerException?: Error) {
+    public constructor(entity: string | (new (...args: any[]) => any), message?: string, cause?: Error);
+    public constructor(entity: string | (new (...args: any[]) => any), cause?: Error);
+    public constructor(entity: string | (new (...args: any[]) => any), messageOrCause?: string | Error, cause?: Error) {
         super(
-            typeof messageOrInnerException === 'string' ?
-                messageOrInnerException :
+            typeof messageOrCause === 'string' ?
+                messageOrCause :
                 'Resource or entity not found.',
-            typeof messageOrInnerException === 'string' || innerException ?
-                innerException :
-                messageOrInnerException
+            typeof messageOrCause === 'string' || cause ?
+                cause :
+                messageOrCause
         );
         this._entityType = Symbol('Entity type');
         this.data[this._entityType] = typeof entity === 'function' ? entity.name : entity;

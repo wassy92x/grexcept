@@ -6,16 +6,16 @@ import {OperationAbortedException} from './OperationAbortedException';
 export class TimeoutException extends OperationAbortedException {
     public readonly _timeout: symbol;
 
-    public constructor(timeout: number, reason?: string, innerException?: Error);
-    public constructor(timeout: number, innerException?: Error);
-    public constructor(timeout: number, reasonOrInnerException?: string | Error, innerException?: Error) {
+    public constructor(timeout: number, reason?: string, cause?: Error);
+    public constructor(timeout: number, cause?: Error);
+    public constructor(timeout: number, reasonOrCause?: string | Error, cause?: Error) {
         super(
-            typeof reasonOrInnerException === 'string' ?
-                reasonOrInnerException :
+            typeof reasonOrCause === 'string' ?
+                reasonOrCause :
                 'Timeout has been reached.',
-            typeof reasonOrInnerException === 'string' || innerException ?
-                innerException :
-                reasonOrInnerException
+            typeof reasonOrCause === 'string' || cause ?
+                cause :
+                reasonOrCause
         );
         this._timeout = Symbol('Timeout');
     }

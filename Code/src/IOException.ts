@@ -4,16 +4,16 @@ import {Exception} from './Exception';
  * Exception that will be thrown if an input or output error occurred.
  */
 export class IOException extends Exception {
-    public constructor(innerException?: Error);
-    public constructor(message?: string, innerException?: Error);
-    public constructor(messageOrInnerException?: string | Error, innerException?: Error) {
+    public constructor(cause?: Error);
+    public constructor(message?: string, cause?: Error);
+    public constructor(messageOrCause?: string | Error, cause?: Error) {
         super(
-            typeof messageOrInnerException === 'string' ?
-                messageOrInnerException :
+            typeof messageOrCause === 'string' ?
+                messageOrCause :
                 'I/O error occurred.',
-            typeof messageOrInnerException === 'string' || innerException ?
-                innerException :
-                messageOrInnerException
+            typeof messageOrCause === 'string' || cause ?
+                cause :
+                messageOrCause
         );
     }
 }
