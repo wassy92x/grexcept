@@ -10,6 +10,7 @@ export * from './NotFoundException';
 export * from './NotImplementedException';
 export * from './NotPermittedException';
 export * from './NotSupportedException';
+export * from './ObjectDisposedException';
 export * from './OperationAbortedException';
 export * from './TimeoutException';
 export * from './ValidationException';
