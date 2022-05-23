@@ -10,7 +10,8 @@ export class AggregateException extends Exception implements Iterable<Error> {
     public constructor(innerExceptions: Error | Error[]);
     public constructor(innerExceptions: Error | Error[], message?: string) {
         const exceptions = Array.isArray(innerExceptions) ? innerExceptions.slice() : [innerExceptions]
-        super(message ?? `One or more errors occurred.`, exceptions[0]);
+        const messages = exceptions.map((e: Error, i: number) => `#${i} ${e.message}`);
+        super(message ?? `One or more errors occurred:\n${messages.join('\n')}`, exceptions[0]);
         this.innerExceptions = exceptions;
     }
 
