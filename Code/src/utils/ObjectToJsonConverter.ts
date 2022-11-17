@@ -17,20 +17,21 @@ export namespace ObjectToJsonConverter {
     }
 
     function _convertSimpleObjectToJson(rawObject: any, visitedObjects: WeakSet<object> | Set<object>): object {
-        const objProperties = Object.keys(rawObject);
+        const objProperties = Reflect.ownKeys(rawObject);
         const result: any = {};
         for (const property of objProperties) {
-            const isPrivate = /^_|#.+/.test(property.toString());
+            const propertyName = typeof property !== 'symbol' ? property : ((property as any).description ?? property.toString().slice(7, -1));
+            const isPrivate = typeof property !== 'symbol' ? /^_|#.+/.test(propertyName.toString()) : false;
             if (isPrivate)
                 continue;
 
             const value = rawObject[property];
             const typeOfValue = typeof value;
             if (typeOfValue === 'string' || typeOfValue === 'boolean' || typeOfValue === 'number' || value === null) {
-                result[property] = value;
+                result[propertyName] = value;
             } else if (typeOfValue === 'object') {
                 if (!visitedObjects.has(value))
-                    result[property] = _convertObjectToJson(value, visitedObjects);
+                    result[propertyName] = _convertObjectToJson(value, visitedObjects);
             }
         }
         return result;
