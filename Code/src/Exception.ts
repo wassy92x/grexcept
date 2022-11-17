@@ -1,19 +1,16 @@
-export interface IException {
-    name: string;
-    message: string;
-    stack?: string;
-    cause?: IException;
-}
+import {ObjectToJsonConverter} from './utils/ObjectToJsonConverter';
+
+export type ExceptionLike = {readonly message: string, readonly name: string, readonly stack?: string, readonly cause?: ExceptionLike, readonly data?: { [k: PropertyKey]: any }};
 
 /**
  * Baseclass of all other exception classes.
  */
-export class Exception extends Error implements IException {
-    public readonly cause?: Error;
-    public readonly data: Record<PropertyKey, any>;
+export class Exception extends Error {
+    public readonly cause?: ExceptionLike;
+    public readonly data: { [k: PropertyKey]: any };
     private readonly _stackTrace?: string;
 
-    public constructor(message: string, cause?: Error) {
+    public constructor(message: string, cause?: ExceptionLike) {
         super(message);
         this.name = this.constructor.name;
         this.data = {};
@@ -29,7 +26,7 @@ export class Exception extends Error implements IException {
     }
 
     public get stack(): string {
-        let dataEntries = this._stringifyData();
+        let dataEntries = this._dataToString();
         if (dataEntries)
             dataEntries += '\n';
 
@@ -40,7 +37,7 @@ export class Exception extends Error implements IException {
         return `${this.name}: ${this.message} --> ${cause}\n--- End of inner exception stack trace ---\n${dataEntries}${this._stackTrace}`;
     }
 
-    private _stringifyData(): string {
+    private _dataToString(): string {
         return Reflect.ownKeys(this.data).map((key: PropertyKey) => {
             const name = typeof key === 'symbol' ?
                 ((key as any).description ?? key.toString().slice(7, -1)) : // .slice is a walk around to get symbol description in old environments
@@ -54,8 +51,8 @@ export class Exception extends Error implements IException {
         return this.stack;
     }
 
-    public toJSON(): IException {
-        return Exception.toJSON(this, WeakSet ? new WeakSet() : new Set());
+    public toJSON(): object {
+        return Exception._toJSON(this, WeakSet ? new WeakSet() : new Set());
     }
 
     /**
@@ -65,13 +62,13 @@ export class Exception extends Error implements IException {
         return this.cause;
     }
 
-    public static isError(ex: any): ex is Error {
+    public static isError(ex: any): ex is ExceptionLike {
         return ex instanceof Error ||
             ex instanceof Exception ||
-            (ex && (ex.stack || ex.stack === '') && (ex.name || ex.name === '') && (ex.message || ex.message === ''));
+            (ex && (typeof ex.stack === 'string' || typeof ex.stack === 'undefined') && typeof ex.name === 'string' && typeof ex.message === 'string');
     }
 
-    public static fromObject(ex: any): Error {
+    public static fromObject(ex: any): ExceptionLike {
         if (Exception.isError(ex))
             return ex;
         if (typeof ex === 'string' || ex instanceof String)
@@ -79,29 +76,32 @@ export class Exception extends Error implements IException {
         return new ChuckNorrisException(ex);
     }
 
-    private static toJSON(exception: IException, visitedObjects: WeakSet<IException> | Set<IException>): IException {
-        if (visitedObjects.has(exception))
-            return {
-                name: '[Circular] ' + exception.name,
-                message: exception.message,
-                stack: exception.stack
-            };
-
-        visitedObjects.add(exception);
-
-        if (exception.cause)
-            return {
-                name: exception.name,
-                message: exception.message,
-                stack: exception.stack,
-                cause: this.toJSON(exception.cause, visitedObjects)
-            };
-
-        return {
+    private static _toJSON(exception: ExceptionLike, visitedObjects: WeakSet<object> | Set<object>): ExceptionLike {
+        const result: { -readonly [K in keyof ExceptionLike]: ExceptionLike[K] } = {
             name: exception.name,
-            message: exception.message,
-            stack: exception.stack
+            message: exception.message
         };
+        const alreadyVisited = visitedObjects.has(exception);
+
+        if (exception.cause && !alreadyVisited) {
+            visitedObjects.add(exception);
+            result.cause = this._toJSON(exception.cause, visitedObjects);
+        } else if(!alreadyVisited) {
+            visitedObjects.add(exception);
+
+            if (exception.stack)
+                result.stack = exception.stack;
+
+            if (exception.data)
+                result.data = ObjectToJsonConverter.convert(exception.data);
+        } else {
+            if (exception.stack)
+                result.stack = '[Circular!] ' + exception.stack.substring(0, exception.stack.indexOf('\n', exception.stack.indexOf('\n') + 1));
+            else
+                result.stack = '[Circular!]';
+        }
+
+        return result
     }
 }
 
