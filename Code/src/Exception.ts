@@ -5,13 +5,15 @@ export type ExceptionLike = {readonly message: string, readonly name: string, re
 /**
  * Baseclass of all other exception classes.
  */
-export class Exception extends Error {
+export class Exception {
+    public readonly name: string;
+    public readonly message: string;
     public readonly cause?: ExceptionLike;
     public readonly data: { [k: PropertyKey]: any };
     private readonly _stackTrace?: string;
 
     public constructor(message: string, cause?: ExceptionLike) {
-        super(message);
+        this.message = message;
         this.name = this.constructor.name;
         this.data = {};
         this.cause = cause;
@@ -53,13 +55,6 @@ export class Exception extends Error {
 
     public toJSON(): object {
         return Exception._toJSON(this, WeakSet ? new WeakSet() : new Set());
-    }
-
-    /**
-     * @deprecated The property should not be used. Use instead .cause
-     */
-    public get innerException(): Error | undefined {
-        return this.cause;
     }
 
     public static isError(ex: any): ex is ExceptionLike {
