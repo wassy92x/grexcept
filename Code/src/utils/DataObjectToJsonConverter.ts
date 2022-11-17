@@ -1,4 +1,4 @@
-export namespace ObjectToJsonConverter {
+export namespace DataObjectToJsonConverter {
     export function convert(rawObject: object): object {
         return _convertObjectToJson(rawObject, WeakSet ? new WeakSet() : new Set());
     }
@@ -17,21 +17,20 @@ export namespace ObjectToJsonConverter {
     }
 
     function _convertSimpleObjectToJson(rawObject: any, visitedObjects: WeakSet<object> | Set<object>): object {
-        const objProperties = Reflect.ownKeys(rawObject);
+        const objProperties = Object.keys(rawObject);
         const result: any = {};
         for (const property of objProperties) {
-            const propertyName = typeof property !== 'symbol' ? property : ((property as any).description ?? property.toString().slice(7, -1));
-            const isPrivate = typeof property !== 'symbol' ? /^_|#.+/.test(propertyName.toString()) : false;
+            const isPrivate = /^_|#.+/.test(property.toString());
             if (isPrivate)
                 continue;
 
             const value = rawObject[property];
             const typeOfValue = typeof value;
             if (typeOfValue === 'string' || typeOfValue === 'boolean' || typeOfValue === 'number' || value === null) {
-                result[propertyName] = value;
+                result[property] = value;
             } else if (typeOfValue === 'object') {
                 if (!visitedObjects.has(value))
-                    result[propertyName] = _convertObjectToJson(value, visitedObjects);
+                    result[property] = _convertObjectToJson(value, visitedObjects);
             }
         }
         return result;

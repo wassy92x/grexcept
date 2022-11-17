@@ -1,4 +1,4 @@
-import {ObjectToJsonConverter} from './utils/ObjectToJsonConverter';
+import {DataObjectToJsonConverter} from './utils/DataObjectToJsonConverter';
 
 export type ExceptionLike = {readonly message: string, readonly name: string, readonly stack?: string, readonly cause?: ExceptionLike, readonly data?: { [k: PropertyKey]: any }};
 
@@ -88,7 +88,22 @@ export class Exception {
                 result.stack = exception.stack;
 
             if (exception.data)
-                result.data = ObjectToJsonConverter.convert(exception.data);
+                result.data = DataObjectToJsonConverter.convert(
+                    Reflect.ownKeys(exception.data).reduce((res: any, key: string | symbol) => {
+                        let keyName: string;
+                        if (typeof key === 'symbol') {
+                            keyName = ((key as any).description ?? key.toString().slice(7, -1))
+                                .toLowerCase()
+                                .replace(/[-_\s.]+(.)?/g, (_: string, c: string) => c ? c.toUpperCase() : '');
+                            keyName = keyName.substring(0, 1).toLowerCase() + keyName.substring(1);
+
+                        } else {
+                            keyName = key;
+                        }
+                        res[keyName] = exception.data![key];
+                        return res;
+                    }, {})
+                );
         } else {
             if (exception.stack)
                 result.stack = '[Circular!] ' + exception.stack.substring(0, exception.stack.indexOf('\n', exception.stack.indexOf('\n') + 1));
