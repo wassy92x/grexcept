@@ -1,7 +1,14 @@
+export interface IException {
+    name: string;
+    message: string;
+    stack?: string;
+    cause?: IException;
+}
+
 /**
  * Baseclass of all other exception classes.
  */
-export class Exception extends Error {
+export class Exception extends Error implements IException {
     public readonly cause?: Error;
     public readonly data: Record<PropertyKey, any>;
     private readonly _stackTrace?: string;
@@ -47,6 +54,10 @@ export class Exception extends Error {
         return this.stack;
     }
 
+    public toJSON(): IException {
+        return Exception.toJSON(this, WeakSet ? new WeakSet() : new Set());
+    }
+
     /**
      * @deprecated The property should not be used. Use instead .cause
      */
@@ -66,6 +77,31 @@ export class Exception extends Error {
         if (typeof ex === 'string' || ex instanceof String)
             return new Exception(ex.toString());
         return new ChuckNorrisException(ex);
+    }
+
+    private static toJSON(exception: IException, visitedObjects: WeakSet<IException> | Set<IException>): IException {
+        if (visitedObjects.has(exception))
+            return {
+                name: '[Circular] ' + exception.name,
+                message: exception.message,
+                stack: exception.stack
+            };
+
+        visitedObjects.add(exception);
+
+        if (exception.cause)
+            return {
+                name: exception.name,
+                message: exception.message,
+                stack: exception.stack,
+                cause: this.toJSON(exception.cause, visitedObjects)
+            };
+
+        return {
+            name: exception.name,
+            message: exception.message,
+            stack: exception.stack
+        };
     }
 }
 
