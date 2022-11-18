@@ -35,6 +35,6 @@ export class AggregateException extends Exception implements Iterable<ExceptionL
             })
             .join('\n\n');
 
-        return `${super.stack}\n${innerStacks}`;
+        return `${super._buildStacktrace()}\n${innerStacks}`;
     }
 }
