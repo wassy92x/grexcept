@@ -1,19 +1,40 @@
 import {DataObjectToJsonConverter} from './utils/DataObjectToJsonConverter';
 
-export type ExceptionLike = {readonly message: string, readonly name: string, readonly stack?: string, readonly cause?: ExceptionLike, readonly data?: { [k: PropertyKey]: any }};
+export type ExceptionLike = {
+    readonly message: string,
+    readonly name: string,
+    readonly stack?: string,
+    readonly cause?: ExceptionLike,
+    readonly data?: { [k: PropertyKey]: any }
+};
 
 /**
  * Baseclass of all other exception classes.
  */
-export class Exception {
-    public readonly name: string;
-    public readonly message: string;
+export class Exception extends Error {
     public readonly cause?: ExceptionLike;
     public readonly data: { [k: PropertyKey]: any };
     private readonly _stackTrace?: string;
 
     public constructor(message: string, cause?: ExceptionLike) {
-        this.message = message;
+        super(message);
+        Object.defineProperty(this, 'stack', { // Walk around to print stack in case of passing exception object to console. (works only in browser)
+            get: this._buildStacktrace,
+            enumerable: false,
+            configurable: true
+        });
+        Object.defineProperty(this, 'data', {
+            ...Object.getOwnPropertyDescriptor(this, 'data'),
+            enumerable: false
+        });
+        Object.defineProperty(this, 'cause', {
+            ...Object.getOwnPropertyDescriptor(this, 'cause'),
+            enumerable: false
+        });
+        Object.defineProperty(this, '_stackTrace', {
+            ...Object.getOwnPropertyDescriptor(this, '_stackTrace'),
+            enumerable: false
+        });
         this.name = this.constructor.name;
         this.data = {};
         this.cause = cause;
@@ -27,7 +48,7 @@ export class Exception {
         }
     }
 
-    public get stack(): string {
+    protected _buildStacktrace(): string {
         let dataEntries = this._dataToString();
         if (dataEntries)
             dataEntries += '\n';
@@ -50,7 +71,7 @@ export class Exception {
     }
 
     public toString(): string {
-        return this.stack;
+        return this._buildStacktrace();
     }
 
     public toJSON(): object {

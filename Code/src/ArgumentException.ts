@@ -1,4 +1,4 @@
-import {Exception} from './Exception';
+import {Exception, ExceptionLike} from './Exception';
 
 /**
  * Exception that will be thrown if a value is invalid.
@@ -6,9 +6,9 @@ import {Exception} from './Exception';
 export class ArgumentException extends Exception {
     private readonly _argumentName: symbol;
 
-    public constructor(argumentName: PropertyKey, message?: string, cause?: Error);
+    public constructor(argumentName: PropertyKey, message?: string, cause?: ExceptionLike);
     public constructor(argumentName: PropertyKey, cause?: Error);
-    public constructor(argumentName: PropertyKey, messageOrCause?: string | Error, cause?: Error) {
+    public constructor(argumentName: PropertyKey, messageOrCause?: string | ExceptionLike, cause?: ExceptionLike) {
         super(
             typeof messageOrCause === 'string' ?
                 messageOrCause :
@@ -17,6 +17,10 @@ export class ArgumentException extends Exception {
                 cause :
                 messageOrCause
         );
+        Object.defineProperty(this, '_argumentName', {
+            ...Object.getOwnPropertyDescriptor(this, '_argumentName'),
+            enumerable: false
+        });
         this._argumentName = Symbol('Argument name');
         this.data[this._argumentName] = argumentName;
     }

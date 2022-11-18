@@ -1,12 +1,13 @@
 import {ArgumentException} from './ArgumentException';
+import {ExceptionLike} from './Exception';
 
 /**
  * Exception that will be thrown if a value is null or undefined.
  */
 export class ArgumentNullException extends ArgumentException {
-    public constructor(argumentName: PropertyKey, message?: string, cause?: Error);
-    public constructor(argumentName: PropertyKey, cause?: Error);
-    public constructor(argumentName: PropertyKey, messageOrCause?: string | Error, cause?: Error) {
+    public constructor(argumentName: PropertyKey, message?: string, cause?: ExceptionLike);
+    public constructor(argumentName: PropertyKey, cause?: ExceptionLike);
+    public constructor(argumentName: PropertyKey, messageOrCause?: string | ExceptionLike, cause?: ExceptionLike) {
         super(
             argumentName,
             typeof messageOrCause === 'string' ?

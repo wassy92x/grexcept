@@ -1,4 +1,5 @@
 import {OperationAbortedException} from './OperationAbortedException';
+import {ExceptionLike} from './Exception';
 
 /**
  * Exception that will be thrown if some operation has timed out.
@@ -6,9 +7,9 @@ import {OperationAbortedException} from './OperationAbortedException';
 export class TimeoutException extends OperationAbortedException {
     public readonly _timeout: symbol;
 
-    public constructor(timeout: number, reason?: string, cause?: Error);
-    public constructor(timeout: number, cause?: Error);
-    public constructor(timeout: number, reasonOrCause?: string | Error, cause?: Error) {
+    public constructor(timeout: number, reason?: string, cause?: ExceptionLike);
+    public constructor(timeout: number, cause?: ExceptionLike);
+    public constructor(timeout: number, reasonOrCause?: string | ExceptionLike, cause?: ExceptionLike) {
         super(
             typeof reasonOrCause === 'string' ?
                 reasonOrCause :
@@ -17,7 +18,12 @@ export class TimeoutException extends OperationAbortedException {
                 cause :
                 reasonOrCause
         );
+        Object.defineProperty(this, '_timeout', {
+            ...Object.getOwnPropertyDescriptor(this, '_timeout'),
+            enumerable: false
+        });
         this._timeout = Symbol('Timeout');
+        this.data[this._timeout] = timeout;
     }
 
     public get timeout(): number {
