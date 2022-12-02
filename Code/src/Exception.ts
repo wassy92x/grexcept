@@ -1,4 +1,4 @@
-import {DataObjectToJsonConverter} from './utils/DataObjectToJsonConverter';
+import {ArgumentException} from './ArgumentException';
 
 export type ExceptionLike = {
     readonly message: string,
@@ -92,7 +92,7 @@ export class Exception extends Error {
         return new ChuckNorrisException(ex);
     }
 
-    private static _toJSON(exception: ExceptionLike, visitedObjects: WeakSet<object> | Set<object>): ExceptionLike {
+    protected static _toJSON(exception: ExceptionLike, visitedObjects: WeakSet<object> | Set<object>): ExceptionLike {
         const result: { -readonly [K in keyof ExceptionLike]: ExceptionLike[K] } = {
             name: exception.name,
             message: exception.message
@@ -109,7 +109,7 @@ export class Exception extends Error {
                 result.stack = exception.stack;
 
             if (exception.data)
-                result.data = DataObjectToJsonConverter.convert(
+                result.data = JsonConverter.convert(
                     Reflect.ownKeys(exception.data).reduce((res: any, key: string | symbol) => {
                         let keyName: string;
                         if (typeof key === 'symbol') {
@@ -154,5 +154,84 @@ export class ChuckNorrisException extends Exception {
 
     public get exceptionObject(): any {
         return this.data[this._exceptionObject];
+    }
+}
+
+class JsonConverter {
+    public static convert(rawObject: object): object {
+        if (typeof rawObject !== 'object' || rawObject === null)
+            throw new ArgumentException('rawObject');
+
+        return this._convertObjectToJson(rawObject, WeakSet ? new WeakSet() : new Set());
+    }
+
+    public static _convertObjectToJson(rawObject: object, visitedObjects: WeakSet<object> | Set<object>): object {
+        visitedObjects.add(rawObject);
+        if (rawObject instanceof Map)
+            return this._convertMapToJson(rawObject, visitedObjects);
+        else if (this._isIterable(rawObject))
+            return this._convertIterableToJson(rawObject, visitedObjects);
+        return this._convertSimpleObjectToJson(rawObject, visitedObjects);
+    }
+
+    public static _isIterable(o: any): o is Iterable<any> {
+        return o && typeof o[Symbol.iterator] === 'function';
+    }
+
+    public static _convertSimpleObjectToJson(rawObject: any, visitedObjects: WeakSet<object> | Set<object>): object {
+        const objProperties = Object.keys(rawObject);
+        const result: any = {};
+        for (const property of objProperties) {
+            const isPrivate = /^_|#.+/.test(property.toString());
+            if (isPrivate)
+                continue;
+
+            const value = rawObject[property];
+            const typeOfValue = typeof value;
+            if (typeOfValue === 'string' || typeOfValue === 'boolean' || typeOfValue === 'number' || value === null) {
+                result[property] = value;
+            } else if (typeOfValue === 'object') {
+                if (!visitedObjects.has(value))
+                    result[property] = this._convertObjectToJson(value, visitedObjects);
+            }
+        }
+        return result;
+    }
+
+    public static _convertMapToJson(map: Map<any, any>, visitedObjects: WeakSet<object> | Set<object>): object {
+        const result: any = {};
+        for (let [key, value] of map) {
+            let keyType = typeof key;
+            if (keyType === 'symbol') {
+                key = ((key as any).description ?? key.toString().slice(7, -1));
+                keyType = 'string';
+            }
+
+            if (keyType !== 'string' && keyType !== 'number')
+                continue;
+
+            const valueType = typeof value;
+            if (valueType === 'string' || valueType === 'boolean' || valueType === 'number' || value === null) {
+                result[key] = value;
+            } else if (valueType === 'object') {
+                if (!visitedObjects.has(value))
+                    result[key] = this._convertObjectToJson(value, visitedObjects);
+            }
+        }
+        return result;
+    }
+
+    public static _convertIterableToJson(iterable: Iterable<any>, visitedObjects: WeakSet<object> | Set<object>): any[] {
+        const result = [];
+        for (const value of iterable) {
+            const typeOfValue = typeof value;
+            if (typeOfValue === 'string' || typeOfValue === 'boolean' || typeOfValue === 'number' || value === null) {
+                result.push(value);
+            } else if (typeOfValue === 'object') {
+                if (!visitedObjects.has(value))
+                    result.push(this._convertObjectToJson(value, visitedObjects));
+            }
+        }
+        return result;
     }
 }

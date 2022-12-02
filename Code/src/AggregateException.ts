@@ -27,6 +27,12 @@ export class AggregateException extends Exception implements Iterable<ExceptionL
         return this.innerExceptions.slice();
     }
 
+    public toJSON(): object {
+        const json: any = super.toJSON();
+        json.innerExceptions = this.innerExceptions.map((ex: ExceptionLike) => Exception._toJSON(ex, WeakSet ? new WeakSet() : new Set()))
+        return json;
+    }
+
     protected _buildStacktrace(): string {
         const innerStacks = this.innerExceptions
             .map((ex: ExceptionLike, i: number) => {
