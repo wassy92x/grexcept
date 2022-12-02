@@ -179,6 +179,11 @@ class JsonConverter {
     }
 
     public static _convertSimpleObjectToJson(rawObject: any, visitedObjects: WeakSet<object> | Set<object>): object {
+        if (typeof rawObject.toJSON === 'function') {
+            const json = rawObject.toJSON();
+            return typeof json === 'string' ? JSON.parse(json) : json;
+        }
+
         const objProperties = Object.keys(rawObject);
         const result: any = {};
         for (const property of objProperties) {
