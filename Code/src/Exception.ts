@@ -1,5 +1,3 @@
-import {ArgumentException} from './ArgumentException';
-
 export type ExceptionLike = {
     readonly message: string,
     readonly name: string,
@@ -48,8 +46,8 @@ export class Exception extends Error {
         }
     }
 
-    protected _buildStacktrace(): string {
-        let dataEntries = this._dataToString();
+    protected _buildStacktrace(json = false): string {
+        let dataEntries = this._dataToString(json);
         if (dataEntries)
             dataEntries += '\n';
 
@@ -60,18 +58,22 @@ export class Exception extends Error {
         return `${this.name}: ${this.message} --> ${cause}\n--- End of inner exception stack trace ---\n${dataEntries}${this._stackTrace}`;
     }
 
-    private _dataToString(): string {
+    private _dataToString(json = false): string {
         return Reflect.ownKeys(this.data).map((key: PropertyKey) => {
             const name = typeof key === 'symbol' ?
                 ((key as any).description ?? key.toString().slice(7, -1)) : // .slice is a walk around to get symbol description in old environments
                 key;
 
-            return `${name}: ${this.data[key]}`;
+            const dataType = typeof this.data[key];
+
+            return json ?
+                `${name}: ${JsonConverter.convert(this.data[key])}` :
+                `${name}: ${this.data[key]}`;
         }).join('\n');
     }
 
-    public toString(): string {
-        return this._buildStacktrace();
+    public toString(json = false): string {
+        return this._buildStacktrace(json);
     }
 
     public toJSON(): object {
@@ -92,8 +94,8 @@ export class Exception extends Error {
         return new ChuckNorrisException(ex);
     }
 
-    protected static _toJSON(exception: ExceptionLike, visitedObjects: WeakSet<object> | Set<object>): ExceptionLike {
-        const result: { -readonly [K in keyof ExceptionLike]: ExceptionLike[K] } = {
+    protected static _toJSON(exception: ExceptionLike, visitedObjects: WeakSet<object> | Set<object>): object {
+        const result: any = {
             name: exception.name,
             message: exception.message
         };
@@ -158,14 +160,19 @@ export class ChuckNorrisException extends Exception {
 }
 
 class JsonConverter {
-    public static convert(rawObject: object): object {
-        if (typeof rawObject !== 'object' || rawObject === null)
-            throw new ArgumentException('rawObject');
+    public static convert(rawObject: string | number | boolean | null | object): string | number | boolean | null | object {
+        const type = typeof rawObject;
 
-        return this._convertObjectToJson(rawObject, WeakSet ? new WeakSet() : new Set());
+        if (type === 'string' || type === 'number' || type === 'boolean' || rawObject === null)
+            return rawObject;
+
+        if (type === 'object')
+            return this._convertObjectToJson(rawObject as object, WeakSet ? new WeakSet() : new Set());
+
+        return rawObject?.toString() ?? 'undefined';
     }
 
-    public static _convertObjectToJson(rawObject: object, visitedObjects: WeakSet<object> | Set<object>): object {
+    public static _convertObjectToJson(rawObject: object, visitedObjects: WeakSet<object> | Set<object>): string | number | boolean | null | object {
         visitedObjects.add(rawObject);
         if (rawObject instanceof Map)
             return this._convertMapToJson(rawObject, visitedObjects);
@@ -178,11 +185,9 @@ class JsonConverter {
         return o && typeof o[Symbol.iterator] === 'function';
     }
 
-    public static _convertSimpleObjectToJson(rawObject: any, visitedObjects: WeakSet<object> | Set<object>): object {
-        if (typeof rawObject.toJSON === 'function') {
-            const json = rawObject.toJSON();
-            return typeof json === 'string' ? JSON.parse(json) : json;
-        }
+    public static _convertSimpleObjectToJson(rawObject: any, visitedObjects: WeakSet<object> | Set<object>): string | number | boolean | null | object {
+        if (typeof rawObject.toJSON === 'function')
+            return rawObject.toJSON();
 
         const objProperties = Object.keys(rawObject);
         const result: any = {};
