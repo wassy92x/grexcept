@@ -21,11 +21,10 @@ export class NotFoundException extends Exception {
             ...Object.getOwnPropertyDescriptor(this, '_entityType'),
             enumerable: false
         });
-        this._entityType = Symbol('Entity type');
-        this.data[this._entityType] = typeof entity === 'function' ? entity.name : entity;
+        this._entityType = this.data.add('Entity type',typeof entity === 'function' ? entity.name : entity);
     }
 
     public get entityType(): string {
-        return this.data[this._entityType];
+        return this.data.get(this._entityType);
     }
 }

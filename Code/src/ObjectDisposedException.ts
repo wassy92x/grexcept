@@ -22,11 +22,10 @@ export class ObjectDisposedException extends InvalidOperationException {
             ...Object.getOwnPropertyDescriptor(this, '_objectName'),
             enumerable: false
         });
-        this._objectName = Symbol('Object name');
-        this.data[this._objectName] = objectName;
+        this._objectName = this.data.add('Object name', objectName);
     }
 
     public get objectName(): string {
-        return this.data[this._objectName];
+        return this.data.get(this._objectName);
     }
 }

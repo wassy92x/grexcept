@@ -1,9 +1,153 @@
+class JsonConverter {
+    public static convert(rawObject: string | number | boolean | null | object): string | number | boolean | null | object {
+        const type = typeof rawObject;
+
+        if (type === 'string' || type === 'number' || type === 'boolean' || rawObject === null)
+            return rawObject;
+
+        if (type === 'object')
+            return this._convertObjectToJson(rawObject as object, WeakSet ? new WeakSet() : new Set());
+
+        return rawObject?.toString() ?? null;
+    }
+
+    private static _convertObjectToJson(rawObject: object, visitedObjects: WeakSet<object> | Set<object>): string | number | boolean | null | object {
+        visitedObjects.add(rawObject);
+        if (rawObject instanceof Map)
+            return this._convertMapToJson(rawObject, visitedObjects);
+        else if (this._isIterable(rawObject))
+            return this._convertIterableToJson(rawObject, visitedObjects);
+        return this._convertSimpleObjectToJson(rawObject, visitedObjects);
+    }
+
+    private static _isIterable(o: any): o is Iterable<any> {
+        return o && typeof o[Symbol.iterator] === 'function';
+    }
+
+    private static _convertSimpleObjectToJson(rawObject: any, visitedObjects: WeakSet<object> | Set<object>): string | number | boolean | null | object {
+        if (typeof rawObject.toJSON === 'function')
+            return rawObject.toJSON();
+
+        const objProperties = Object.keys(rawObject);
+        const result: any = {};
+        for (const property of objProperties) {
+            const isPrivate = /^_|#.+/.test(property.toString());
+            if (isPrivate)
+                continue;
+
+            const value = rawObject[property];
+            const typeOfValue = typeof value;
+            if (typeOfValue === 'string' || typeOfValue === 'boolean' || typeOfValue === 'number' || value === null) {
+                result[property] = value;
+            } else if (typeOfValue === 'object') {
+                if (!visitedObjects.has(value))
+                    result[property] = this._convertObjectToJson(value, visitedObjects);
+            }
+        }
+        return result;
+    }
+
+    private static _convertMapToJson(map: Map<any, any>, visitedObjects: WeakSet<object> | Set<object>): object {
+        const result: any = {};
+        for (let [key, value] of map) {
+            let keyType = typeof key;
+            if (keyType === 'symbol') {
+                key = ((key as any).description ?? key.toString().slice(7, -1));
+                keyType = 'string';
+            }
+
+            if (keyType !== 'string' && keyType !== 'number')
+                continue;
+
+            const valueType = typeof value;
+            if (valueType === 'string' || valueType === 'boolean' || valueType === 'number' || value === null) {
+                result[key] = value;
+            } else if (valueType === 'object') {
+                if (!visitedObjects.has(value))
+                    result[key] = this._convertObjectToJson(value, visitedObjects);
+            }
+        }
+        return result;
+    }
+
+    private static _convertIterableToJson(iterable: Iterable<any>, visitedObjects: WeakSet<object> | Set<object>): any[] {
+        const result = [];
+        for (const value of iterable) {
+            const typeOfValue = typeof value;
+            if (typeOfValue === 'string' || typeOfValue === 'boolean' || typeOfValue === 'number' || value === null) {
+                result.push(value);
+            } else if (typeOfValue === 'object') {
+                if (!visitedObjects.has(value))
+                    result.push(this._convertObjectToJson(value, visitedObjects));
+            }
+        }
+        return result;
+    }
+}
+
+export class ExceptionData {
+    [k: PropertyKey]: any;
+
+    public add(description: string, data: any): symbol {
+        const key = Symbol(description);
+        this[key] = data;
+        return key;
+    }
+
+    public remove(key: PropertyKey): boolean {
+        if (this.hasOwnProperty(key)) {
+            this[key] = null;
+            delete this[key];
+            return true;
+        }
+        return false;
+    }
+
+    public get(key: PropertyKey): any {
+        if (!this.hasOwnProperty(key))
+            throw new Exception('Key not found');
+
+        return this[key];
+    }
+
+    public toJSON(): object {
+        return JsonConverter.convert(
+            Reflect.ownKeys(this).reduce((res: any, key: string | symbol) => {
+                let keyName: string;
+                if (typeof key === 'symbol') {
+                    keyName = ((key as any).description ?? key.toString().slice(7, -1))
+                        .toLowerCase()
+                        .replace(/[-_\s.]+(.)?/g, (_: string, c: string) => c ? c.toUpperCase() : '');
+                    keyName = keyName.substring(0, 1).toLowerCase() + keyName.substring(1);
+
+                } else {
+                    keyName = key;
+                }
+                res[keyName] = this[key];
+                return res;
+            }, {})
+        ) as object;
+    }
+
+    public toString(json = false): string {
+        return Reflect.ownKeys(this).map((key: PropertyKey) => {
+            const name = typeof key === 'symbol' ?
+                ((key as any).description ?? key.toString().slice(7, -1)) : // .slice is a walk around to get symbol description in old environments
+                key;
+
+            return json ?
+                `${name}: ${JsonConverter.convert(this.data[key])}` :
+                `${name}: ${this.data[key]}`;
+        }).join('\n');
+    }
+}
+
 export type ExceptionLike = {
-    readonly message: string,
-    readonly name: string,
-    readonly stack?: string,
-    readonly cause?: ExceptionLike,
-    readonly data?: { [k: PropertyKey]: any }
+    readonly message: string;
+    readonly name: string;
+    readonly stack?: string;
+    readonly cause?: ExceptionLike;
+    readonly data?: ExceptionData;
 };
 
 /**
@@ -11,7 +155,7 @@ export type ExceptionLike = {
  */
 export class Exception extends Error {
     public readonly cause?: ExceptionLike;
-    public readonly data: { [k: PropertyKey]: any };
+    public readonly data: ExceptionData;
     private readonly _stackTrace?: string;
 
     public constructor(message: string, cause?: ExceptionLike) {
@@ -34,7 +178,7 @@ export class Exception extends Error {
             enumerable: false
         });
         this.name = this.constructor.name;
-        this.data = {};
+        this.data = new ExceptionData();
         this.cause = cause;
         if (typeof (Error as any).captureStackTrace === 'function') {
             const capturedStack = {stack: ''};
@@ -47,7 +191,7 @@ export class Exception extends Error {
     }
 
     protected _buildStacktrace(json = false): string {
-        let dataEntries = this._dataToString(json);
+        let dataEntries = this.data.toString(json);
         if (dataEntries)
             dataEntries += '\n';
 
@@ -56,20 +200,6 @@ export class Exception extends Error {
 
         const cause = this.cause.stack ?? `${this.cause.name}: ${this.cause.message}`;
         return `${this.name}: ${this.message} --> ${cause}\n--- End of inner exception stack trace ---\n${dataEntries}${this._stackTrace}`;
-    }
-
-    private _dataToString(json = false): string {
-        return Reflect.ownKeys(this.data).map((key: PropertyKey) => {
-            const name = typeof key === 'symbol' ?
-                ((key as any).description ?? key.toString().slice(7, -1)) : // .slice is a walk around to get symbol description in old environments
-                key;
-
-            const dataType = typeof this.data[key];
-
-            return json ?
-                `${name}: ${JsonConverter.convert(this.data[key])}` :
-                `${name}: ${this.data[key]}`;
-        }).join('\n');
     }
 
     public toString(json = false): string {
@@ -111,22 +241,7 @@ export class Exception extends Error {
                 result.stack = exception.stack;
 
             if (exception.data)
-                result.data = JsonConverter.convert(
-                    Reflect.ownKeys(exception.data).reduce((res: any, key: string | symbol) => {
-                        let keyName: string;
-                        if (typeof key === 'symbol') {
-                            keyName = ((key as any).description ?? key.toString().slice(7, -1))
-                                .toLowerCase()
-                                .replace(/[-_\s.]+(.)?/g, (_: string, c: string) => c ? c.toUpperCase() : '');
-                            keyName = keyName.substring(0, 1).toLowerCase() + keyName.substring(1);
-
-                        } else {
-                            keyName = key;
-                        }
-                        res[keyName] = exception.data![key];
-                        return res;
-                    }, {})
-                );
+                result.data = exception.data.toJSON();
         } else {
             if (exception.stack)
                 result.stack = '[Circular!] ' + exception.stack.substring(0, exception.stack.indexOf('\n', exception.stack.indexOf('\n') + 1));
@@ -148,100 +263,12 @@ export class ChuckNorrisException extends Exception {
         super('An error occurred.');
         if (typeof exceptionObject === 'object') {
             for (const [key, value] of Object.entries(exceptionObject))
-                this.data[key] = value;
+                this.data.add(key, value);
         }
-        this._exceptionObject = Symbol('Original exception object');
-        this.data[this._exceptionObject] = exceptionObject;
+        this._exceptionObject = this.data.add('Original exception object', exceptionObject);
     }
 
     public get exceptionObject(): any {
-        return this.data[this._exceptionObject];
-    }
-}
-
-class JsonConverter {
-    public static convert(rawObject: string | number | boolean | null | object): string | number | boolean | null | object {
-        const type = typeof rawObject;
-
-        if (type === 'string' || type === 'number' || type === 'boolean' || rawObject === null)
-            return rawObject;
-
-        if (type === 'object')
-            return this._convertObjectToJson(rawObject as object, WeakSet ? new WeakSet() : new Set());
-
-        return rawObject?.toString() ?? 'undefined';
-    }
-
-    public static _convertObjectToJson(rawObject: object, visitedObjects: WeakSet<object> | Set<object>): string | number | boolean | null | object {
-        visitedObjects.add(rawObject);
-        if (rawObject instanceof Map)
-            return this._convertMapToJson(rawObject, visitedObjects);
-        else if (this._isIterable(rawObject))
-            return this._convertIterableToJson(rawObject, visitedObjects);
-        return this._convertSimpleObjectToJson(rawObject, visitedObjects);
-    }
-
-    public static _isIterable(o: any): o is Iterable<any> {
-        return o && typeof o[Symbol.iterator] === 'function';
-    }
-
-    public static _convertSimpleObjectToJson(rawObject: any, visitedObjects: WeakSet<object> | Set<object>): string | number | boolean | null | object {
-        if (typeof rawObject.toJSON === 'function')
-            return rawObject.toJSON();
-
-        const objProperties = Object.keys(rawObject);
-        const result: any = {};
-        for (const property of objProperties) {
-            const isPrivate = /^_|#.+/.test(property.toString());
-            if (isPrivate)
-                continue;
-
-            const value = rawObject[property];
-            const typeOfValue = typeof value;
-            if (typeOfValue === 'string' || typeOfValue === 'boolean' || typeOfValue === 'number' || value === null) {
-                result[property] = value;
-            } else if (typeOfValue === 'object') {
-                if (!visitedObjects.has(value))
-                    result[property] = this._convertObjectToJson(value, visitedObjects);
-            }
-        }
-        return result;
-    }
-
-    public static _convertMapToJson(map: Map<any, any>, visitedObjects: WeakSet<object> | Set<object>): object {
-        const result: any = {};
-        for (let [key, value] of map) {
-            let keyType = typeof key;
-            if (keyType === 'symbol') {
-                key = ((key as any).description ?? key.toString().slice(7, -1));
-                keyType = 'string';
-            }
-
-            if (keyType !== 'string' && keyType !== 'number')
-                continue;
-
-            const valueType = typeof value;
-            if (valueType === 'string' || valueType === 'boolean' || valueType === 'number' || value === null) {
-                result[key] = value;
-            } else if (valueType === 'object') {
-                if (!visitedObjects.has(value))
-                    result[key] = this._convertObjectToJson(value, visitedObjects);
-            }
-        }
-        return result;
-    }
-
-    public static _convertIterableToJson(iterable: Iterable<any>, visitedObjects: WeakSet<object> | Set<object>): any[] {
-        const result = [];
-        for (const value of iterable) {
-            const typeOfValue = typeof value;
-            if (typeOfValue === 'string' || typeOfValue === 'boolean' || typeOfValue === 'number' || value === null) {
-                result.push(value);
-            } else if (typeOfValue === 'object') {
-                if (!visitedObjects.has(value))
-                    result.push(this._convertObjectToJson(value, visitedObjects));
-            }
-        }
-        return result;
+        return this.data.get(this._exceptionObject);
     }
 }

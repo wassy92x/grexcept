@@ -23,11 +23,10 @@ export class ArgumentOutOfRangeException extends ArgumentException {
             ...Object.getOwnPropertyDescriptor(this, '_actualValue'),
             enumerable: false
         });
-        this._actualValue = Symbol('Value');
-        this.data[this._actualValue] = actualValue;
+        this._actualValue = this.data.add('Value', actualValue);
     }
 
     public get actualValue(): any {
-        return this.data[this._actualValue];
+        return this.data.get(this._actualValue);
     }
 }

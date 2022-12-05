@@ -21,11 +21,10 @@ export class ArgumentException extends Exception {
             ...Object.getOwnPropertyDescriptor(this, '_argumentName'),
             enumerable: false
         });
-        this._argumentName = Symbol('Argument name');
-        this.data[this._argumentName] = argumentName;
+        this._argumentName = this.data.add('Argument name', argumentName);
     }
 
     public get argumentName(): PropertyKey {
-        return this.data[this._argumentName];
+        return this.data.get(this._argumentName);
     }
 }

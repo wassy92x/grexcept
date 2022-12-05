@@ -22,11 +22,10 @@ export class TimeoutException extends OperationAbortedException {
             ...Object.getOwnPropertyDescriptor(this, '_timeout'),
             enumerable: false
         });
-        this._timeout = Symbol('Timeout');
-        this.data[this._timeout] = timeout;
+        this._timeout = this.data.add('Timeout', timeout);
     }
 
     public get timeout(): number {
-        return this.data[this._timeout];
+        return this.data.get(this._timeout);
     }
 }
