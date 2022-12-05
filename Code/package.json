@@ -1,6 +1,6 @@
 {
   "name": "grexcept",
-  "version": "2.0.7-exception-data",
+  "version": "2.0.7-exception-data+1",
   "description": "Common exception classes for browser and NodeJS",
   "repository": "https://github.com/wassy92x/grexcept",
   "keywords": [

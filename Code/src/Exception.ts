@@ -136,7 +136,7 @@ export class ExceptionData {
                 key;
 
             return json ?
-                `${name}: ${JsonConverter.convert(this.data[key])}` :
+                `${name}: ${JSON.stringify(JsonConverter.convert(this.data[key]))}` :
                 `${name}: ${this.data[key]}`;
         }).join('\n');
     }
