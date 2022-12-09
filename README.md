@@ -29,7 +29,7 @@ new Exception(message: string, cause?: Error)
 Exception.fromObject(ex: any): Error
 // wrapps object inside a exception object if object is not already a exception or error
 
-Exception.isError(ex: any): ex is ExceptionLike
+Exception.isError(ex: any): ex is Error
 // returns true for objects which implement the error-shape
 ```
 

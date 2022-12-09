@@ -1,4 +1,4 @@
-import {Exception, ExceptionLike} from './Exception';
+import {Exception} from './Exception';
 
 /**
  * Exception that will be thrown if some resource or entity was not found.
@@ -6,9 +6,9 @@ import {Exception, ExceptionLike} from './Exception';
 export class NotFoundException extends Exception {
     public readonly _entityType: symbol;
 
-    public constructor(entity: string | (new (...args: any[]) => any), message?: string, cause?: ExceptionLike);
-    public constructor(entity: string | (new (...args: any[]) => any), cause?: ExceptionLike);
-    public constructor(entity: string | (new (...args: any[]) => any), messageOrCause?: string | ExceptionLike, cause?: ExceptionLike) {
+    public constructor(entity: string | (new (...args: any[]) => any), message?: string, cause?: Error);
+    public constructor(entity: string | (new (...args: any[]) => any), cause?: Error);
+    public constructor(entity: string | (new (...args: any[]) => any), messageOrCause?: string | Error, cause?: Error) {
         super(
             typeof messageOrCause === 'string' ?
                 messageOrCause :

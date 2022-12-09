@@ -1,5 +1,4 @@
 import {OperationAbortedException} from './OperationAbortedException';
-import {ExceptionLike} from './Exception';
 
 /**
  * Exception that will be thrown if some operation has timed out.
@@ -7,9 +6,9 @@ import {ExceptionLike} from './Exception';
 export class TimeoutException extends OperationAbortedException {
     public readonly _timeout: symbol;
 
-    public constructor(timeout: number, reason?: string, cause?: ExceptionLike);
-    public constructor(timeout: number, cause?: ExceptionLike);
-    public constructor(timeout: number, reasonOrCause?: string | ExceptionLike, cause?: ExceptionLike) {
+    public constructor(timeout: number, reason?: string, cause?: Error);
+    public constructor(timeout: number, cause?: Error);
+    public constructor(timeout: number, reasonOrCause?: string | Error, cause?: Error) {
         super(
             typeof reasonOrCause === 'string' ?
                 reasonOrCause :

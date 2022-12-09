@@ -142,23 +142,15 @@ export class ExceptionData {
     }
 }
 
-export type ExceptionLike = {
-    readonly message: string;
-    readonly name: string;
-    readonly stack?: string;
-    readonly cause?: ExceptionLike;
-    readonly data?: ExceptionData;
-};
-
 /**
  * Baseclass of all other exception classes.
  */
 export class Exception extends Error {
-    public readonly cause?: ExceptionLike;
+    public readonly cause?: Error;
     public readonly data: ExceptionData;
     private readonly _stackTrace?: string;
 
-    public constructor(message: string, cause?: ExceptionLike) {
+    public constructor(message: string, cause?: Error) {
         super(message);
         Object.defineProperty(this, 'stack', { // Walk around to print stack in case of passing exception object to console. (works only in browser)
             get: this._buildStacktrace,
@@ -206,42 +198,44 @@ export class Exception extends Error {
         return this._buildStacktrace(json);
     }
 
-    public toJSON(): object {
-        return Exception._toJSON(this, WeakSet ? new WeakSet() : new Set());
+    public toJSON(maxDepth = 4): object | string {
+        return Exception._toJSON(this, WeakSet ? new WeakSet() : new Set(), 1, maxDepth);
     }
 
-    public static isError(ex: any): ex is ExceptionLike {
-        return ex instanceof Error ||
-            ex instanceof Exception ||
-            (ex && (typeof ex.stack === 'string' || typeof ex.stack === 'undefined') && typeof ex.name === 'string' && typeof ex.message === 'string');
+    public static isError(ex: any): ex is Error {
+        return ex instanceof Error;
     }
 
-    public static fromObject(ex: any): ExceptionLike {
+    public static fromObject(ex: any): Error {
         if (Exception.isError(ex))
             return ex;
         if (typeof ex === 'string' || ex instanceof String)
             return new Exception(ex.toString());
+
         return new ChuckNorrisException(ex);
     }
 
-    protected static _toJSON(exception: ExceptionLike, visitedObjects: WeakSet<object> | Set<object>): object {
+    protected static _toJSON(exception: Error, visitedObjects: WeakSet<object> | Set<object>, level: number, maxDepth = 4): object | string {
+        if (level === maxDepth)
+            return exception.toString();
+
         const result: any = {
             name: exception.name,
             message: exception.message
         };
         const alreadyVisited = visitedObjects.has(exception);
 
-        if (exception.cause && !alreadyVisited) {
+        if (Exception.isError((exception as Exception).cause) && !alreadyVisited) {
             visitedObjects.add(exception);
-            result.cause = this._toJSON(exception.cause, visitedObjects);
+            result.cause = this._toJSON((exception as Exception).cause!, visitedObjects, level + 1, maxDepth);
         } else if(!alreadyVisited) {
             visitedObjects.add(exception);
 
             if (exception.stack)
                 result.stack = exception.stack;
 
-            if (exception.data)
-                result.data = exception.data.toJSON();
+            if ((exception as Exception).data instanceof ExceptionData)
+                result.data = (exception as Exception).data.toJSON();
         } else {
             if (exception.stack)
                 result.stack = '[Circular!] ' + exception.stack.substring(0, exception.stack.indexOf('\n', exception.stack.indexOf('\n') + 1));

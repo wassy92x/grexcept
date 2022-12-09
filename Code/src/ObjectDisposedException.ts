@@ -1,5 +1,4 @@
 import {InvalidOperationException} from './InvalidOperationException';
-import {ExceptionLike} from './Exception';
 
 /**
  * Exception that will be thrown if an operation is invalid because the object is already disposed.
@@ -7,9 +6,9 @@ import {ExceptionLike} from './Exception';
 export class ObjectDisposedException extends InvalidOperationException {
     private readonly _objectName: symbol;
 
-    public constructor(objectName: string, cause?: ExceptionLike);
-    public constructor(objectName: string, message?: string, cause?: ExceptionLike);
-    public constructor(objectName: string, messageOrCause?: string | ExceptionLike, cause?: ExceptionLike) {
+    public constructor(objectName: string, cause?: Error);
+    public constructor(objectName: string, message?: string, cause?: Error);
+    public constructor(objectName: string, messageOrCause?: string | Error, cause?: Error) {
         super(
             typeof messageOrCause === 'string' ?
                 messageOrCause :

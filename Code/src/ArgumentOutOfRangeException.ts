@@ -1,5 +1,4 @@
 import {ArgumentException} from './ArgumentException';
-import {ExceptionLike} from './Exception';
 
 /**
  * Exception that will be thrown if a value is out of a range.
@@ -7,9 +6,9 @@ import {ExceptionLike} from './Exception';
 export class ArgumentOutOfRangeException extends ArgumentException {
     private readonly _actualValue: symbol;
 
-    public constructor(argumentName: PropertyKey, actualValue: any, message?: string, cause?: ExceptionLike);
-    public constructor(argumentName: PropertyKey, actualValue: any, cause?: ExceptionLike);
-    public constructor(argumentName: PropertyKey, actualValue: any, messageOrCause?: string | ExceptionLike, cause?: ExceptionLike) {
+    public constructor(argumentName: PropertyKey, actualValue: any, message?: string, cause?: Error);
+    public constructor(argumentName: PropertyKey, actualValue: any, cause?: Error);
+    public constructor(argumentName: PropertyKey, actualValue: any, messageOrCause?: string | Error, cause?: Error) {
         super(
             argumentName,
             typeof messageOrCause === 'string' ?
