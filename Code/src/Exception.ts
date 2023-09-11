@@ -182,6 +182,11 @@ export class Exception extends Error {
         }
     }
 
+    public withData(description: string, data: any): this {
+        this.data.add(description, data);
+        return this;
+    }
+
     protected _buildStacktrace(json = false): string {
         let dataEntries = this.data.toString(json);
         if (dataEntries)
