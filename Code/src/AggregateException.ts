@@ -19,6 +19,15 @@ export class AggregateException extends Exception implements Iterable<Error> {
         this.innerExceptions = exceptions;
     }
 
+    public static throwSingleOrAggregate<T extends Error>(innerExceptions: T | ReadonlyArray<T>, message?: string): void {
+        if (!Array.isArray(innerExceptions))
+            throw innerExceptions;
+        else if (innerExceptions.length === 1)
+            throw innerExceptions[0];
+        else if (innerExceptions.length)
+            throw new AggregateException(innerExceptions, message);
+    }
+
     public [Symbol.iterator](): Iterator<Error> {
         return this.innerExceptions[Symbol.iterator]();
     }
