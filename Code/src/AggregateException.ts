@@ -6,9 +6,9 @@ import {Exception} from './Exception';
 export class AggregateException extends Exception implements Iterable<Error> {
     public readonly innerExceptions: ReadonlyArray<Error>;
 
-    public constructor(innerExceptions: Error | Error[], message?: string);
-    public constructor(innerExceptions: Error | Error[]);
-    public constructor(innerExceptions: Error | Error[], message?: string) {
+    public constructor(innerExceptions: Error | ReadonlyArray<Error>, message?: string);
+    public constructor(innerExceptions: Error | ReadonlyArray<Error>);
+    public constructor(innerExceptions: Error | ReadonlyArray<Error>, message?: string) {
         const exceptions = Array.isArray(innerExceptions) ? innerExceptions.slice() : [innerExceptions]
         const messages = exceptions.map((e: Error, i: number) => `#${i} ${e.message}`);
         super(message ?? `One or more errors occurred:\n${messages.join('\n')}`, exceptions[0]);

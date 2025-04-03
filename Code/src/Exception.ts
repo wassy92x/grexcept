@@ -182,8 +182,15 @@ export class Exception extends Error {
         }
     }
 
-    public withData(description: string, data: any): this {
-        this.data.add(description, data);
+    public withData<T>(description: string, data: T, out?: {value?: symbol | null | undefined}): this {
+        const key = this.data.add(description, data);
+        if (out)
+            out.value = key;
+        return this;
+    }
+
+    public withKeyData(key: PropertyKey, data: any): this {
+        this.data[key] = data;
         return this;
     }
 
